@@ -7,7 +7,7 @@ module Guard
   class Uglify < Guard
     def initialize(watchers=[], options={})
       super 
-      @input  = options[:input]
+      @input  = Array(options[:input])
       @output = options[:output]
     end
 
@@ -30,14 +30,14 @@ module Guard
     private
     def uglify
       begin
-        uglified = Uglifier.new.compile(File.read(@input))
+        uglified = Uglifier.new.compile(@input.map {|f| File.read(f)}.join)
         File.open(@output,'w'){ |f| f.write(uglified) }
-        UI.info         "Uglified #{@input} to #{@output}"
-        Notifier.notify "Uglified #{@input} to #{@output}", :title => 'Uglify'
+        UI.info         "Uglified #{@input.join(', ')} to #{@output}"
+        Notifier.notify "Uglified #{@input.join(', ')} to #{@output}", :title => 'Uglify'
         true
       rescue Exception => e
-        UI.error        "Uglifying #{@input} failed: #{e}"
-        Notifier.notify "Uglifying #{@input} failed: #{e}", :title => 'Uglify', :image => :failed
+        UI.error        "Uglifying #{@input.join(', ')} failed: #{e}"
+        Notifier.notify "Uglifying #{@input.join(', ')} failed: #{e}", :title => 'Uglify', :image => :failed
         false
       end
     end
